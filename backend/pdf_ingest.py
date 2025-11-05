@@ -297,3 +297,8 @@ if __name__ == "__main__":
         t_print["transaction_date"] = t_print["transaction_date"].isoformat() if t_print.get("transaction_date") else None
         t_print["posted_date"] = t_print["posted_date"].isoformat() if t_print.get("posted_date") else None
         print(json.dumps(t_print, indent=2))
+
+
+/#reate a dataframe that makes the view easier to see what it would look like on a table 
+
+
