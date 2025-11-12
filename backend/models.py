@@ -11,6 +11,18 @@ Base = declarative_base()
 def gen_uuid():
     return str(uuid.uuid4())
 
+import uuid
+from sqlalchemy import (
+    Column, String, Integer, Date, DECIMAL, Text, Enum, CHAR, TIMESTAMP, func
+)
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+
+Base = declarative_base()
+
+def gen_uuid():
+    return str(uuid.uuid4())
+
 class Customer(Base):
     __tablename__ = "customers"
     id = Column(CHAR(36), primary_key=True, default=gen_uuid)

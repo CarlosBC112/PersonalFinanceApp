@@ -1,0 +1,7 @@
+CREATE DATABASE IF NOT EXISTS fintrack;
+USE fintrack;
+CREATE TABLE categories (category_id INT AUTO_INCREMENT PRIMARY KEY, category_name VARCHAR(100) NOT NULL UNIQUE, description VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE customers (customer_id INT AUTO_INCREMENT PRIMARY KEY, account_number VARCHAR(50) UNIQUE, account_type VARCHAR(50), holder_name VARCHAR(100), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE transactions_staging (staging_id INT AUTO_INCREMENT PRIMARY KEY, transaction_date VARCHAR(50), post_date VARCHAR(50), description VARCHAR(500), category VARCHAR(100), type VARCHAR(50), amount VARCHAR(50), memo VARCHAR(255), loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE transactions (transaction_id INT AUTO_INCREMENT PRIMARY KEY, customer_id INT, category_id INT, transaction_date DATE, post_date DATE, description VARCHAR(500), amount DECIMAL(12, 2), transaction_type VARCHAR(50), memo VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (customer_id) REFERENCES customers(customer_id), FOREIGN KEY (category_id) REFERENCES categories(category_id), INDEX idx_transaction_date (transaction_date), INDEX idx_category_id (category_id), INDEX idx_customer_id (customer_id));
+CREATE TABLE staging_errors (error_id INT AUTO_INCREMENT PRIMARY KEY, staging_id INT, error_message VARCHAR(500), error_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (staging_id) REFERENCES transactions_staging(staging_id));
