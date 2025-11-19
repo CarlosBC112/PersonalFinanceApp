@@ -48,37 +48,50 @@ async def upload_csv(file: UploadFile = File(...)):
         )
         
         inserted_count = 0
+        skipped_count = 0
         with conn.cursor() as cursor:
             for row in reader:
+                # Extract transaction data
                 transaction_date = row.get('transaction_date') or row.get('Transaction Date') or row.get('date') or row.get('Date')
+                post_date = row.get('post_date') or row.get('Post Date') or row.get('date') or row.get('Date')
                 description = row.get('description') or row.get('Description')
+                category = row.get('category') or row.get('Category')
+                trans_type = row.get('type') or row.get('Type') or 'expense'
                 amount = row.get('amount') or row.get('Amount') or '0'
-                # Check for duplicate
+                memo = row.get('memo') or row.get('Memo') or ''
+                
+                # Check for duplicate based on transaction_date, description, and amount
                 cursor.execute("""
-                    SELECT COUNT(*) as cnt FROM transactions_staging
-                    WHERE transaction_date = %s AND description = %s AND amount = %s
+                    SELECT COUNT(*) as count FROM transactions_staging 
+                    WHERE transaction_date = %s 
+                    AND description = %s 
+                    AND amount = %s
                 """, (transaction_date, description, amount))
+                
                 result = cursor.fetchone()
-                if result['cnt'] == 0:
-                    cursor.execute("""
-                        INSERT INTO transactions_staging 
-                        (transaction_date, post_date, description, category, type, amount, memo) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    """, (
-                        transaction_date,
-                        row.get('post_date') or row.get('Post Date') or row.get('date') or row.get('Date'),
-                        description,
-                        row.get('category') or row.get('Category'),
-                        row.get('type') or row.get('Type') or 'expense',
-                        amount,
-                        row.get('memo') or row.get('Memo') or ''
-                    ))
-                    inserted_count += 1
+                if result['count'] > 0:
+                    # Skip this transaction as it already exists
+                    skipped_count += 1
+                    continue
+                
+                # Insert transaction into staging table with correct column names
+                cursor.execute("""
+                    INSERT INTO transactions_staging 
+                    (transaction_date, post_date, description, category, type, amount, memo) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (transaction_date, post_date, description, category, trans_type, amount, memo))
+                inserted_count += 1
             conn.commit()
         conn.close()
+        
+        # Build message based on results
+        message = f"CSV uploaded successfully. {inserted_count} transactions imported."
+        if skipped_count > 0:
+            message += f" {skipped_count} duplicate(s) skipped."
+        
         return {
             "success": True, 
-            "message": f"CSV uploaded successfully. {inserted_count} new transactions imported."
+            "message": message
         }
     except Exception as e:
         import traceback
@@ -110,8 +123,7 @@ def get_transactions():
                     transaction_date as date,
                     type
                 FROM transactions_staging
-                ORDER BY staging_id DESC
-                LIMIT 100
+                ORDER BY STR_TO_DATE(transaction_date, '%m/%d/%Y') DESC, staging_id DESC
             """)
             transactions = cursor.fetchall()
         conn.close()
@@ -138,10 +150,11 @@ def get_daily_analytics():
             cursor.execute("""
                 SELECT 
                     transaction_date as date,
-                    SUM(CAST(amount AS DECIMAL(12,2))) as total,
+                    ABS(SUM(CAST(amount AS DECIMAL(12,2)))) as total,
                     COUNT(*) as transactions
                 FROM transactions_staging
                 WHERE transaction_date IS NOT NULL AND transaction_date != ''
+                AND CAST(amount AS DECIMAL(12,2)) < 0
                 GROUP BY transaction_date
                 ORDER BY transaction_date DESC
                 LIMIT 30
@@ -171,11 +184,12 @@ def get_monthly_analytics():
             # Get total spending
             cursor.execute("""
                 SELECT 
-                    SUM(CAST(amount AS DECIMAL(12,2))) as totalSpending,
-                    AVG(CAST(amount AS DECIMAL(12,2))) as dailyAverage,
+                    ABS(SUM(CAST(amount AS DECIMAL(12,2)))) as totalSpending,
+                    ABS(AVG(CAST(amount AS DECIMAL(12,2)))) as dailyAverage,
                     COUNT(*) as transactionCount
                 FROM transactions_staging
                 WHERE transaction_date IS NOT NULL AND transaction_date != ''
+                AND CAST(amount AS DECIMAL(12,2)) < 0
             """)
             summary = cursor.fetchone()
             
@@ -183,10 +197,11 @@ def get_monthly_analytics():
             cursor.execute("""
                 SELECT 
                     COALESCE(category, 'Uncategorized') as category,
-                    SUM(CAST(amount AS DECIMAL(12,2))) as amount,
+                    ABS(SUM(CAST(amount AS DECIMAL(12,2)))) as amount,
                     COUNT(*) as count
                 FROM transactions_staging
                 WHERE transaction_date IS NOT NULL AND transaction_date != ''
+                AND CAST(amount AS DECIMAL(12,2)) < 0
                 GROUP BY category
                 ORDER BY amount DESC
             """)
@@ -200,6 +215,29 @@ def get_monthly_analytics():
                     'category': cat['category'],
                     'amount': float(cat['amount']),
                     'percent': (float(cat['amount']) / total) * 100
+                })
+            
+            # Get income vs expenses by month
+            cursor.execute("""
+                SELECT 
+                    DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%b') as month,
+                    DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%Y-%m') as month_key,
+                    SUM(CASE WHEN CAST(amount AS DECIMAL(12,2)) > 0 THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END) as income,
+                    ABS(SUM(CASE WHEN CAST(amount AS DECIMAL(12,2)) < 0 THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as expenses
+                FROM transactions_staging
+                WHERE transaction_date IS NOT NULL AND transaction_date != ''
+                GROUP BY month_key, month
+                ORDER BY month_key ASC
+                LIMIT 12
+            """)
+            income_vs_expenses_data = cursor.fetchall()
+            
+            income_vs_expenses = []
+            for row in income_vs_expenses_data:
+                income_vs_expenses.append({
+                    'month': row['month'],
+                    'income': float(row['income']),
+                    'expenses': float(row['expenses'])
                 })
             
             # Simple trend data (just return empty for now)
@@ -223,7 +261,7 @@ def get_monthly_analytics():
             },
             "categoryBreakdown": category_breakdown,
             "trend": trend,
-            "incomeVsExpenses": []
+            "incomeVsExpenses": income_vs_expenses
         }
     except Exception as e:
         import traceback
