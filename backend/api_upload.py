@@ -26,37 +26,37 @@ MYSQL_USER = os.getenv("MYSQL_USER", "root")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "")
 MYSQL_DB = os.getenv("MYSQL_DB", "fintrack")
 
-# Category color mapping
+# Category color mapping with recommended spending percentages
 CATEGORY_COLORS = {
-    'Housing': {'color': '#3b82f6', 'accentClass': 'bg-blue-600'},
-    'Home': {'color': '#3b82f6', 'accentClass': 'bg-blue-600'},
-    'Transportation': {'color': '#f97316', 'accentClass': 'bg-orange-500'},
-    'Food': {'color': '#10b981', 'accentClass': 'bg-green-500'},
-    'Food & Dining': {'color': '#10b981', 'accentClass': 'bg-green-500'},
-    'Food & Drink': {'color': '#ef4444', 'accentClass': 'bg-red-500'},
-    'Groceries': {'color': '#10b981', 'accentClass': 'bg-emerald-500'},
-    'Restaurants': {'color': '#84cc16', 'accentClass': 'bg-lime-500'},
-    'Utilities': {'color': '#eab308', 'accentClass': 'bg-yellow-500'},
-    'Bills & Utilities': {'color': '#eab308', 'accentClass': 'bg-yellow-500'},
-    'Insurance': {'color': '#a855f7', 'accentClass': 'bg-purple-500'},
-    'Medical & Healthcare': {'color': '#ef4444', 'accentClass': 'bg-red-500'},
-    'Healthcare': {'color': '#ef4444', 'accentClass': 'bg-red-500'},
-    'Health & Wellness': {'color': '#ef4444', 'accentClass': 'bg-red-500'},
-    'Personal': {'color': '#ec4899', 'accentClass': 'bg-pink-500'},
-    'Personal Care': {'color': '#ec4899', 'accentClass': 'bg-pink-500'},
-    'Recreation and Entertainment': {'color': '#6366f1', 'accentClass': 'bg-indigo-500'},
-    'Entertainment': {'color': '#6366f1', 'accentClass': 'bg-indigo-500'},
-    'Shopping': {'color': '#8b5cf6', 'accentClass': 'bg-violet-500'},
-    'General Merchandise': {'color': '#8b5cf6', 'accentClass': 'bg-violet-500'},
-    'Education': {'color': '#f97316', 'accentClass': 'bg-orange-500'},
-    'Travel': {'color': '#0ea5e9', 'accentClass': 'bg-sky-600'},
-    'Bills': {'color': '#facc15', 'accentClass': 'bg-yellow-400'},
-    'Gas': {'color': '#f59e0b', 'accentClass': 'bg-amber-500'},
-    'Gas & Fuel': {'color': '#f59e0b', 'accentClass': 'bg-amber-500'},
-    'Professional Services': {'color': '#475569', 'accentClass': 'bg-slate-500'},
-    'Gifts & Donations': {'color': '#f43f5e', 'accentClass': 'bg-rose-600'},
-    'Gifts': {'color': '#f43f5e', 'accentClass': 'bg-rose-600'},
-    'Miscellaneous': {'color': '#6b7280', 'accentClass': 'bg-gray-500'},
+    'Housing': {'color': '#3b82f6', 'accentClass': 'bg-blue-600', 'recommended': 30},
+    'Home': {'color': '#3b82f6', 'accentClass': 'bg-blue-600', 'recommended': 30},
+    'Transportation': {'color': '#f97316', 'accentClass': 'bg-orange-500', 'recommended': 15},
+    'Food': {'color': '#10b981', 'accentClass': 'bg-green-500', 'recommended': 12},
+    'Food & Dining': {'color': '#10b981', 'accentClass': 'bg-green-500', 'recommended': 12},
+    'Food & Drink': {'color': '#ef4444', 'accentClass': 'bg-red-500', 'recommended': 12},
+    'Groceries': {'color': '#10b981', 'accentClass': 'bg-emerald-500', 'recommended': 10},
+    'Restaurants': {'color': '#84cc16', 'accentClass': 'bg-lime-500', 'recommended': 5},
+    'Utilities': {'color': '#eab308', 'accentClass': 'bg-yellow-500', 'recommended': 10},
+    'Bills & Utilities': {'color': '#eab308', 'accentClass': 'bg-yellow-500', 'recommended': 10},
+    'Insurance': {'color': '#a855f7', 'accentClass': 'bg-purple-500', 'recommended': 10},
+    'Medical & Healthcare': {'color': '#ef4444', 'accentClass': 'bg-red-500', 'recommended': 8},
+    'Healthcare': {'color': '#ef4444', 'accentClass': 'bg-red-500', 'recommended': 8},
+    'Health & Wellness': {'color': '#ef4444', 'accentClass': 'bg-red-500', 'recommended': 5},
+    'Personal': {'color': '#ec4899', 'accentClass': 'bg-pink-500', 'recommended': 5},
+    'Personal Care': {'color': '#ec4899', 'accentClass': 'bg-pink-500', 'recommended': 5},
+    'Recreation and Entertainment': {'color': '#6366f1', 'accentClass': 'bg-indigo-500', 'recommended': 5},
+    'Entertainment': {'color': '#6366f1', 'accentClass': 'bg-indigo-500', 'recommended': 5},
+    'Shopping': {'color': '#8b5cf6', 'accentClass': 'bg-violet-500', 'recommended': 5},
+    'General Merchandise': {'color': '#8b5cf6', 'accentClass': 'bg-violet-500', 'recommended': 5},
+    'Education': {'color': '#f97316', 'accentClass': 'bg-orange-500', 'recommended': 5},
+    'Travel': {'color': '#0ea5e9', 'accentClass': 'bg-sky-600', 'recommended': 5},
+    'Bills': {'color': '#facc15', 'accentClass': 'bg-yellow-400', 'recommended': 10},
+    'Gas': {'color': '#f59e0b', 'accentClass': 'bg-amber-500', 'recommended': 8},
+    'Gas & Fuel': {'color': '#f59e0b', 'accentClass': 'bg-amber-500', 'recommended': 8},
+    'Professional Services': {'color': '#475569', 'accentClass': 'bg-slate-500', 'recommended': 5},
+    'Gifts & Donations': {'color': '#f43f5e', 'accentClass': 'bg-rose-600', 'recommended': 3},
+    'Gifts': {'color': '#f43f5e', 'accentClass': 'bg-rose-600', 'recommended': 3},
+    'Miscellaneous': {'color': '#6b7280', 'accentClass': 'bg-gray-500', 'recommended': 5},
 }
 
 @app.post("/upload")
@@ -187,7 +187,7 @@ def get_daily_analytics():
                     COUNT(*) as transactions
                 FROM transactions_staging
                 WHERE transaction_date IS NOT NULL AND transaction_date != ''
-                AND CAST(amount AS DECIMAL(12,2)) < 0
+                AND LOWER(type) IN ('expense', 'sale', 'debit')
                 GROUP BY transaction_date
                 ORDER BY transaction_date DESC
                 LIMIT 30
@@ -222,7 +222,7 @@ def get_monthly_analytics():
                     COUNT(*) as transactionCount
                 FROM transactions_staging
                 WHERE transaction_date IS NOT NULL AND transaction_date != ''
-                AND CAST(amount AS DECIMAL(12,2)) < 0
+                AND LOWER(type) IN ('expense', 'sale', 'debit')
             """)
             summary = cursor.fetchone()
             
@@ -234,7 +234,7 @@ def get_monthly_analytics():
                     COUNT(*) as count
                 FROM transactions_staging
                 WHERE transaction_date IS NOT NULL AND transaction_date != ''
-                AND CAST(amount AS DECIMAL(12,2)) < 0
+                AND LOWER(type) IN ('expense', 'sale', 'debit')
                 GROUP BY category
                 ORDER BY amount DESC
             """)
@@ -245,13 +245,19 @@ def get_monthly_analytics():
             category_breakdown = []
             for cat in categories:
                 cat_name = cat['category']
-                color_info = CATEGORY_COLORS.get(cat_name, {'color': '#6b7280', 'accentClass': 'bg-gray-500'})
+                color_info = CATEGORY_COLORS.get(cat_name, {'color': '#6b7280', 'accentClass': 'bg-gray-500', 'recommended': 0})
+                amount = float(cat['amount'])
+                recommended_percent = color_info.get('recommended', 0)
+                recommended_amount = (total * recommended_percent / 100) if recommended_percent > 0 else 0
+                
                 category_breakdown.append({
                     'category': cat_name,
-                    'amount': float(cat['amount']),
-                    'percent': (float(cat['amount']) / total) * 100,
+                    'amount': amount,
+                    'percent': (amount / total) * 100,
                     'color': color_info['color'],
-                    'accentClass': color_info['accentClass']
+                    'accentClass': color_info['accentClass'],
+                    'recommended': recommended_percent,
+                    'recommendedAmount': recommended_amount
                 })
             
             # Get income vs expenses by month
@@ -259,8 +265,8 @@ def get_monthly_analytics():
                 SELECT 
                     DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%b') as month,
                     DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%Y-%m') as month_key,
-                    SUM(CASE WHEN CAST(amount AS DECIMAL(12,2)) > 0 THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END) as income,
-                    ABS(SUM(CASE WHEN CAST(amount AS DECIMAL(12,2)) < 0 THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as expenses
+                    SUM(CASE WHEN LOWER(type) IN ('income', 'credit') THEN ABS(CAST(amount AS DECIMAL(12,2))) ELSE 0 END) as income,
+                    SUM(CASE WHEN LOWER(type) IN ('expense', 'sale', 'debit') THEN ABS(CAST(amount AS DECIMAL(12,2))) ELSE 0 END) as expenses
                 FROM transactions_staging
                 WHERE transaction_date IS NOT NULL AND transaction_date != ''
                 GROUP BY month_key, month
@@ -283,18 +289,19 @@ def get_monthly_analytics():
                     DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%b') as month,
                     DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%Y-%m') as month_key,
                     ABS(SUM(CAST(amount AS DECIMAL(12,2)))) as total,
-                    ABS(SUM(CASE WHEN category = 'Housing' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as housing,
-                    ABS(SUM(CASE WHEN category = 'Food & Dining' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as food,
-                    ABS(SUM(CASE WHEN category = 'Transportation' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as transportation,
-                    ABS(SUM(CASE WHEN category = 'Utilities' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as utilities,
+                    ABS(SUM(CASE WHEN category IN ('Housing', 'Home') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as housing,
+                    ABS(SUM(CASE WHEN category IN ('Food & Dining', 'Food', 'Groceries', 'Restaurants', 'Food & Drink') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as food,
+                    ABS(SUM(CASE WHEN category IN ('Transportation', 'Gas', 'Gas & Fuel') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as transportation,
+                    ABS(SUM(CASE WHEN category IN ('Utilities', 'Bills', 'Bills & Utilities') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as utilities,
                     ABS(SUM(CASE WHEN category = 'Insurance' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as insurance,
-                    ABS(SUM(CASE WHEN category = 'Medical & Healthcare' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as medical,
-                    ABS(SUM(CASE WHEN category = 'Personal Care' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as personal,
-                    ABS(SUM(CASE WHEN category = 'Recreation & Entertainment' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as recreation,
-                    ABS(SUM(CASE WHEN category NOT IN ('Housing', 'Food & Dining', 'Transportation', 'Utilities', 'Insurance', 'Medical & Healthcare', 'Personal Care', 'Recreation & Entertainment') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as miscellaneous
+                    ABS(SUM(CASE WHEN category IN ('Medical & Healthcare', 'Healthcare', 'Health & Wellness') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as medical,
+                    ABS(SUM(CASE WHEN category IN ('Personal Care', 'Personal') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as personal,
+                    ABS(SUM(CASE WHEN category IN ('Recreation & Entertainment', 'Recreation and Entertainment', 'Entertainment') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as recreation,
+                    ABS(SUM(CASE WHEN category = 'Education' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as education,
+                    ABS(SUM(CASE WHEN category NOT IN ('Housing', 'Home', 'Food & Dining', 'Food', 'Groceries', 'Restaurants', 'Food & Drink', 'Transportation', 'Gas', 'Gas & Fuel', 'Utilities', 'Bills', 'Bills & Utilities', 'Insurance', 'Medical & Healthcare', 'Healthcare', 'Health & Wellness', 'Personal Care', 'Personal', 'Recreation & Entertainment', 'Recreation and Entertainment', 'Entertainment', 'Education') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as miscellaneous
                 FROM transactions_staging
                 WHERE transaction_date IS NOT NULL AND transaction_date != ''
-                AND CAST(amount AS DECIMAL(12,2)) < 0
+                AND LOWER(type) IN ('expense', 'sale', 'debit')
                 GROUP BY month_key, month
                 ORDER BY month_key ASC
                 LIMIT 12
@@ -314,6 +321,7 @@ def get_monthly_analytics():
                     'medical': float(row['medical'] or 0),
                     'personal': float(row['personal'] or 0),
                     'recreation': float(row['recreation'] or 0),
+                    'education': float(row['education'] or 0),
                     'miscellaneous': float(row['miscellaneous'] or 0)
                 })
             
