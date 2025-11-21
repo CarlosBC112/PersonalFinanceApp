@@ -290,7 +290,8 @@ def get_monthly_analytics():
                     DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%Y-%m') as month_key,
                     ABS(SUM(CAST(amount AS DECIMAL(12,2)))) as total,
                     ABS(SUM(CASE WHEN category IN ('Housing', 'Home') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as housing,
-                    ABS(SUM(CASE WHEN category IN ('Food & Dining', 'Food', 'Groceries', 'Restaurants', 'Food & Drink') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as food,
+                    ABS(SUM(CASE WHEN category IN ('Groceries', 'Food & Dining', 'Food') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as food,
+                    ABS(SUM(CASE WHEN category IN ('Restaurants', 'Food & Drink') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as dining,
                     ABS(SUM(CASE WHEN category IN ('Transportation', 'Gas', 'Gas & Fuel') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as transportation,
                     ABS(SUM(CASE WHEN category IN ('Utilities', 'Bills', 'Bills & Utilities') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as utilities,
                     ABS(SUM(CASE WHEN category = 'Insurance' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as insurance,
@@ -298,7 +299,8 @@ def get_monthly_analytics():
                     ABS(SUM(CASE WHEN category IN ('Personal Care', 'Personal') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as personal,
                     ABS(SUM(CASE WHEN category IN ('Recreation & Entertainment', 'Recreation and Entertainment', 'Entertainment') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as recreation,
                     ABS(SUM(CASE WHEN category = 'Education' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as education,
-                    ABS(SUM(CASE WHEN category NOT IN ('Housing', 'Home', 'Food & Dining', 'Food', 'Groceries', 'Restaurants', 'Food & Drink', 'Transportation', 'Gas', 'Gas & Fuel', 'Utilities', 'Bills', 'Bills & Utilities', 'Insurance', 'Medical & Healthcare', 'Healthcare', 'Health & Wellness', 'Personal Care', 'Personal', 'Recreation & Entertainment', 'Recreation and Entertainment', 'Entertainment', 'Education') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as miscellaneous
+                    ABS(SUM(CASE WHEN category IN ('Shopping', 'General Merchandise', 'Gifts & Donations', 'Gifts') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as shopping,
+                    ABS(SUM(CASE WHEN category NOT IN ('Housing', 'Home', 'Food & Dining', 'Food', 'Groceries', 'Restaurants', 'Food & Drink', 'Transportation', 'Gas', 'Gas & Fuel', 'Utilities', 'Bills', 'Bills & Utilities', 'Insurance', 'Medical & Healthcare', 'Healthcare', 'Health & Wellness', 'Personal Care', 'Personal', 'Recreation & Entertainment', 'Recreation and Entertainment', 'Entertainment', 'Education', 'Shopping', 'General Merchandise', 'Gifts & Donations', 'Gifts') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as miscellaneous
                 FROM transactions_staging
                 WHERE transaction_date IS NOT NULL AND transaction_date != ''
                 AND LOWER(type) IN ('expense', 'sale', 'debit')
@@ -315,6 +317,7 @@ def get_monthly_analytics():
                     'total': float(row['total']),
                     'housing': float(row['housing'] or 0),
                     'food': float(row['food'] or 0),
+                    'dining': float(row['dining'] or 0),
                     'transportation': float(row['transportation'] or 0),
                     'utilities': float(row['utilities'] or 0),
                     'insurance': float(row['insurance'] or 0),
@@ -322,6 +325,7 @@ def get_monthly_analytics():
                     'personal': float(row['personal'] or 0),
                     'recreation': float(row['recreation'] or 0),
                     'education': float(row['education'] or 0),
+                    'shopping': float(row['shopping'] or 0),
                     'miscellaneous': float(row['miscellaneous'] or 0)
                 })
             
