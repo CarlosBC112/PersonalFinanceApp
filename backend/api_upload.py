@@ -153,10 +153,10 @@ def get_transactions():
                     category as merchant,
                     category,
                     CAST(amount AS DECIMAL(12,2)) as amount,
-                    transaction_date as date,
+                    post_date as date,
                     type
                 FROM transactions_staging
-                ORDER BY STR_TO_DATE(transaction_date, '%m/%d/%Y') DESC, staging_id DESC
+                ORDER BY STR_TO_DATE(post_date, '%m/%d/%Y') DESC, staging_id DESC
             """)
             transactions = cursor.fetchall()
         conn.close()
@@ -182,14 +182,14 @@ def get_daily_analytics():
         with conn.cursor() as cursor:
             cursor.execute("""
                 SELECT 
-                    transaction_date as date,
+                    post_date as date,
                     ABS(SUM(CAST(amount AS DECIMAL(12,2)))) as total,
                     COUNT(*) as transactions
                 FROM transactions_staging
-                WHERE transaction_date IS NOT NULL AND transaction_date != ''
+                WHERE post_date IS NOT NULL AND post_date != ''
                 AND LOWER(type) IN ('expense', 'sale', 'debit')
-                GROUP BY transaction_date
-                ORDER BY transaction_date DESC
+                GROUP BY post_date
+                ORDER BY post_date DESC
                 LIMIT 30
             """)
             daily_data = cursor.fetchall()
@@ -221,7 +221,7 @@ def get_monthly_analytics():
                     ABS(AVG(CAST(amount AS DECIMAL(12,2)))) as dailyAverage,
                     COUNT(*) as transactionCount
                 FROM transactions_staging
-                WHERE transaction_date IS NOT NULL AND transaction_date != ''
+                WHERE post_date IS NOT NULL AND post_date != ''
                 AND LOWER(type) IN ('expense', 'sale', 'debit')
             """)
             summary = cursor.fetchone()
@@ -233,7 +233,7 @@ def get_monthly_analytics():
                     ABS(SUM(CAST(amount AS DECIMAL(12,2)))) as amount,
                     COUNT(*) as count
                 FROM transactions_staging
-                WHERE transaction_date IS NOT NULL AND transaction_date != ''
+                WHERE post_date IS NOT NULL AND post_date != ''
                 AND LOWER(type) IN ('expense', 'sale', 'debit')
                 GROUP BY category
                 ORDER BY amount DESC
@@ -263,12 +263,12 @@ def get_monthly_analytics():
             # Get income vs expenses by month
             cursor.execute("""
                 SELECT 
-                    DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%b') as month,
-                    DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%Y-%m') as month_key,
+                    DATE_FORMAT(STR_TO_DATE(post_date, '%m/%d/%Y'), '%b') as month,
+                    DATE_FORMAT(STR_TO_DATE(post_date, '%m/%d/%Y'), '%Y-%m') as month_key,
                     SUM(CASE WHEN LOWER(type) IN ('income', 'credit', 'payment') THEN ABS(CAST(amount AS DECIMAL(12,2))) ELSE 0 END) as income,
                     SUM(CASE WHEN LOWER(type) IN ('expense', 'sale', 'debit') THEN ABS(CAST(amount AS DECIMAL(12,2))) ELSE 0 END) as expenses
                 FROM transactions_staging
-                WHERE transaction_date IS NOT NULL AND transaction_date != ''
+                WHERE post_date IS NOT NULL AND post_date != ''
                 GROUP BY month_key, month
                 ORDER BY month_key ASC
                 LIMIT 12
@@ -286,8 +286,8 @@ def get_monthly_analytics():
             # Get monthly trend data with category breakdown
             cursor.execute("""
                 SELECT 
-                    DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%b') as month,
-                    DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%Y-%m') as month_key,
+                    DATE_FORMAT(STR_TO_DATE(post_date, '%m/%d/%Y'), '%b') as month,
+                    DATE_FORMAT(STR_TO_DATE(post_date, '%m/%d/%Y'), '%Y-%m') as month_key,
                     ABS(SUM(CAST(amount AS DECIMAL(12,2)))) as total,
                     ABS(SUM(CASE WHEN category IN ('Housing', 'Home') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as housing,
                     ABS(SUM(CASE WHEN category IN ('Groceries', 'Food & Dining', 'Food') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as food,
@@ -302,7 +302,7 @@ def get_monthly_analytics():
                     ABS(SUM(CASE WHEN category IN ('Shopping', 'General Merchandise', 'Gifts & Donations', 'Gifts') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as shopping,
                     ABS(SUM(CASE WHEN category NOT IN ('Housing', 'Home', 'Food & Dining', 'Food', 'Groceries', 'Restaurants', 'Food & Drink', 'Transportation', 'Gas', 'Gas & Fuel', 'Utilities', 'Bills', 'Bills & Utilities', 'Insurance', 'Medical & Healthcare', 'Healthcare', 'Health & Wellness', 'Personal Care', 'Personal', 'Recreation & Entertainment', 'Recreation and Entertainment', 'Entertainment', 'Education', 'Shopping', 'General Merchandise', 'Gifts & Donations', 'Gifts') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as miscellaneous
                 FROM transactions_staging
-                WHERE transaction_date IS NOT NULL AND transaction_date != ''
+                WHERE post_date IS NOT NULL AND post_date != ''
                 AND LOWER(type) IN ('expense', 'sale', 'debit')
                 GROUP BY month_key, month
                 ORDER BY month_key ASC
