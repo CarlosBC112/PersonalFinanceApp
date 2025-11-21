@@ -265,7 +265,7 @@ def get_monthly_analytics():
                 SELECT 
                     DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%b') as month,
                     DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%Y-%m') as month_key,
-                    SUM(CASE WHEN LOWER(type) IN ('income', 'credit') THEN ABS(CAST(amount AS DECIMAL(12,2))) ELSE 0 END) as income,
+                    SUM(CASE WHEN LOWER(type) IN ('income', 'credit', 'payment') THEN ABS(CAST(amount AS DECIMAL(12,2))) ELSE 0 END) as income,
                     SUM(CASE WHEN LOWER(type) IN ('expense', 'sale', 'debit') THEN ABS(CAST(amount AS DECIMAL(12,2))) ELSE 0 END) as expenses
                 FROM transactions_staging
                 WHERE transaction_date IS NOT NULL AND transaction_date != ''
