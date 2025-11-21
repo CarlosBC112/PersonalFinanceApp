@@ -26,6 +26,39 @@ MYSQL_USER = os.getenv("MYSQL_USER", "root")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "")
 MYSQL_DB = os.getenv("MYSQL_DB", "fintrack")
 
+# Category color mapping
+CATEGORY_COLORS = {
+    'Housing': {'color': '#3b82f6', 'accentClass': 'bg-blue-600'},
+    'Home': {'color': '#3b82f6', 'accentClass': 'bg-blue-600'},
+    'Transportation': {'color': '#f97316', 'accentClass': 'bg-orange-500'},
+    'Food': {'color': '#10b981', 'accentClass': 'bg-green-500'},
+    'Food & Dining': {'color': '#10b981', 'accentClass': 'bg-green-500'},
+    'Food & Drink': {'color': '#ef4444', 'accentClass': 'bg-red-500'},
+    'Groceries': {'color': '#10b981', 'accentClass': 'bg-emerald-500'},
+    'Restaurants': {'color': '#84cc16', 'accentClass': 'bg-lime-500'},
+    'Utilities': {'color': '#eab308', 'accentClass': 'bg-yellow-500'},
+    'Bills & Utilities': {'color': '#eab308', 'accentClass': 'bg-yellow-500'},
+    'Insurance': {'color': '#a855f7', 'accentClass': 'bg-purple-500'},
+    'Medical & Healthcare': {'color': '#ef4444', 'accentClass': 'bg-red-500'},
+    'Healthcare': {'color': '#ef4444', 'accentClass': 'bg-red-500'},
+    'Health & Wellness': {'color': '#ef4444', 'accentClass': 'bg-red-500'},
+    'Personal': {'color': '#ec4899', 'accentClass': 'bg-pink-500'},
+    'Personal Care': {'color': '#ec4899', 'accentClass': 'bg-pink-500'},
+    'Recreation and Entertainment': {'color': '#6366f1', 'accentClass': 'bg-indigo-500'},
+    'Entertainment': {'color': '#6366f1', 'accentClass': 'bg-indigo-500'},
+    'Shopping': {'color': '#8b5cf6', 'accentClass': 'bg-violet-500'},
+    'General Merchandise': {'color': '#8b5cf6', 'accentClass': 'bg-violet-500'},
+    'Education': {'color': '#f97316', 'accentClass': 'bg-orange-500'},
+    'Travel': {'color': '#0ea5e9', 'accentClass': 'bg-sky-600'},
+    'Bills': {'color': '#facc15', 'accentClass': 'bg-yellow-400'},
+    'Gas': {'color': '#f59e0b', 'accentClass': 'bg-amber-500'},
+    'Gas & Fuel': {'color': '#f59e0b', 'accentClass': 'bg-amber-500'},
+    'Professional Services': {'color': '#475569', 'accentClass': 'bg-slate-500'},
+    'Gifts & Donations': {'color': '#f43f5e', 'accentClass': 'bg-rose-600'},
+    'Gifts': {'color': '#f43f5e', 'accentClass': 'bg-rose-600'},
+    'Miscellaneous': {'color': '#6b7280', 'accentClass': 'bg-gray-500'},
+}
+
 @app.post("/upload")
 async def upload_csv(file: UploadFile = File(...)):
     """Upload and process a CSV file of transactions"""
@@ -211,10 +244,14 @@ def get_monthly_analytics():
             total = float(summary['totalSpending'] or 1)
             category_breakdown = []
             for cat in categories:
+                cat_name = cat['category']
+                color_info = CATEGORY_COLORS.get(cat_name, {'color': '#6b7280', 'accentClass': 'bg-gray-500'})
                 category_breakdown.append({
-                    'category': cat['category'],
+                    'category': cat_name,
                     'amount': float(cat['amount']),
-                    'percent': (float(cat['amount']) / total) * 100
+                    'percent': (float(cat['amount']) / total) * 100,
+                    'color': color_info['color'],
+                    'accentClass': color_info['accentClass']
                 })
             
             # Get income vs expenses by month
@@ -240,8 +277,45 @@ def get_monthly_analytics():
                     'expenses': float(row['expenses'])
                 })
             
-            # Simple trend data (just return empty for now)
+            # Get monthly trend data with category breakdown
+            cursor.execute("""
+                SELECT 
+                    DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%b') as month,
+                    DATE_FORMAT(STR_TO_DATE(transaction_date, '%m/%d/%Y'), '%Y-%m') as month_key,
+                    ABS(SUM(CAST(amount AS DECIMAL(12,2)))) as total,
+                    ABS(SUM(CASE WHEN category = 'Housing' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as housing,
+                    ABS(SUM(CASE WHEN category = 'Food & Dining' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as food,
+                    ABS(SUM(CASE WHEN category = 'Transportation' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as transportation,
+                    ABS(SUM(CASE WHEN category = 'Utilities' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as utilities,
+                    ABS(SUM(CASE WHEN category = 'Insurance' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as insurance,
+                    ABS(SUM(CASE WHEN category = 'Medical & Healthcare' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as medical,
+                    ABS(SUM(CASE WHEN category = 'Personal Care' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as personal,
+                    ABS(SUM(CASE WHEN category = 'Recreation & Entertainment' THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as recreation,
+                    ABS(SUM(CASE WHEN category NOT IN ('Housing', 'Food & Dining', 'Transportation', 'Utilities', 'Insurance', 'Medical & Healthcare', 'Personal Care', 'Recreation & Entertainment') THEN CAST(amount AS DECIMAL(12,2)) ELSE 0 END)) as miscellaneous
+                FROM transactions_staging
+                WHERE transaction_date IS NOT NULL AND transaction_date != ''
+                AND CAST(amount AS DECIMAL(12,2)) < 0
+                GROUP BY month_key, month
+                ORDER BY month_key ASC
+                LIMIT 12
+            """)
+            trend_data = cursor.fetchall()
+            
             trend = []
+            for row in trend_data:
+                trend.append({
+                    'month': row['month'],
+                    'total': float(row['total']),
+                    'housing': float(row['housing'] or 0),
+                    'food': float(row['food'] or 0),
+                    'transportation': float(row['transportation'] or 0),
+                    'utilities': float(row['utilities'] or 0),
+                    'insurance': float(row['insurance'] or 0),
+                    'medical': float(row['medical'] or 0),
+                    'personal': float(row['personal'] or 0),
+                    'recreation': float(row['recreation'] or 0),
+                    'miscellaneous': float(row['miscellaneous'] or 0)
+                })
             
         conn.close()
         
